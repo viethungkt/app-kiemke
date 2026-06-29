@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Kiểm Kê HL">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Hệ Thống Kiểm Kê Vật Tư — Huệ Linh ERP Bravo</title>
+<title>Kiểm Kê Vật Tư Nội Bộ — Công Ty Huệ Linh</title>
 
 <!-- html5-qrcode CDN for browser-based camera scanning -->
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -884,7 +884,7 @@ tr:hover td {
       <button data-view="caidat"><span class="ico">⚙️</span><span class="txt">Cấu hình & Đồng bộ</span></button>
     </nav>
     <div class="sidebar-foot">
-      ERP Bravo Standardization v1.0
+      Kiểm Kê Vật Tư Huệ Linh v1.0
       <div class="mode-pill" id="modePill">Chế độ: Cục bộ</div>
     </div>
   </aside>
@@ -1408,7 +1408,7 @@ tr:hover td {
 <div id="loginOverlay" class="login-overlay" style="display: flex;">
   <div class="login-box">
     <div class="login-header">
-      <h2>KIỂM KÊ ERP BRAVO</h2>
+      <h2>KIỂM KÊ NỘI BỘ HUỆ LINH</h2>
       <p>Công ty TNHH Thương mại - Sản xuất Huệ Linh</p>
     </div>
     <form id="loginForm" onsubmit="doLoginAction(event)">
@@ -1419,14 +1419,14 @@ tr:hover td {
         </select>
       </div>
       <div class="form-group">
-        <label for="loginPass">Mật khẩu xác nhận</label>
-        <input type="password" id="loginPass" placeholder="Nhập mật khẩu (mặc định: mã nhân sự viết thường)" required>
+        <label for="loginPass">Mã xác minh (Mật khẩu)</label>
+        <input type="password" id="loginPass" placeholder="Nhập mã xác minh (mã nhân sự viết thường)" required>
       </div>
-      <button type="submit" class="btn-login">ĐĂNG NHẬP</button>
+      <button type="submit" class="btn-login">XÁC NHẬN ĐĂNG NHẬP</button>
       <div class="login-error" id="loginError"></div>
     </form>
     <div class="login-hint">
-      <small>Mật khẩu mặc định là <b>Mã nhân viên viết thường</b> (VD: t0008, d0012). Tài khoản Admin: <b>admin</b> / <b>admin123</b>.</small>
+      <small>Mã xác minh mặc định là <b>mã nhân viên viết thường</b> (VD: t0008, d0012). Admin: <b>admin</b> / <b>admin123</b>.</small>
     </div>
   </div>
 </div>
