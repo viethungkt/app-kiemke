@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kiểm Kê HL">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Hệ Thống Kiểm Kê Vật Tư — Huệ Linh ERP Bravo</title>
+
+<!-- html5-qrcode CDN for browser-based camera scanning -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<style>
+:root {
+  --primary: #1e3a8a; /* Deep blue */
+  --primary-hover: #1e40af;
+  --primary-light: #eff6ff;
+  --success: #10b981; /* Green */
+  --success-dark: #065f46;
+  --warning: #f59e0b; /* Yellow/Orange */
+  --danger: #ef4444; /* Red */
+  --danger-hover: #dc2626;
+  --neutral-dark: #1f2937;
+  --neutral-light: #f3f4f6;
+  --border: #e5e7eb;
+  --text-muted: #6b7280;
+  --glass: rgba(255, 255, 255, 0.8);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f8fafc;
+  color: var(--neutral-dark);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Hamburger & Overlay for mobile view */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1001;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  width: 42px;
+  height: 42px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  z-index: 999;
+  backdrop-filter: blur(4px);
+}
+
+.overlay.open {
+  display: block;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background: linear-gradient(180deg, #1e3a8a 0%, #0f172a 100%);
+  color: #fff;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+}
+
+.brand {
+  padding: 20px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.brand h1 {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.5px;
+}
+
+.brand span {
+  font-size: 11px;
+  opacity: 0.7;
+  display: block;
+  margin-top: 4px;
+}
+
+.nav {
+  flex: 1;
+  padding: 14px 0;
+}
+
+.nav button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #d1d5db;
+  padding: 12px 18px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left: 4px solid transparent;
+  transition: all 0.15s ease-in-out;
+}
+
+.nav button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.nav button.active {
+  background: rgba(255, 255, 255, 0.1);
+  border-left-color: #3b82f6;
+  color: #fff;
+  font-weight: 600;
+}
+
+.nav .ico {
+  font-size: 18px;
+  width: 22px;
+  text-align: center;
+}
+
+.sidebar-foot {
+  padding: 14px 16px;
+  font-size: 11px;
+  opacity: 0.6;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mode-pill {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Main Panel */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.topbar h2 {
+  font-size: 18px;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.topbar .sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.content {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card Styling */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card h3 {
+  font-size: 15px;
+  color: var(--primary);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--primary-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.col {
+  flex: 1;
+  min-width: 200px;
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background-color: #fff;
+  color: var(--neutral-dark);
+  transition: all 0.15s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Buttons */
+.btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(30, 58, 138, 0.15);
+}
+
+.btn:hover {
+  background: var(--primary-hover);
+}
+
+.btn.sec {
+  background: #fff;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  box-shadow: none;
+}
+
+.btn.sec:hover {
+  background: var(--primary-light);
+}
+
+.btn.danger {
+  background: var(--danger);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15);
+}
+
+.btn.danger:hover {
+  background: var(--danger-hover);
+}
+
+.btn.sm {
+  padding: 7px 14px;
+  font-size: 12px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Data Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+tr:nth-child(even) td {
+  background-color: #fafbfd;
+}
+
+tr:hover td {
+  background-color: #f1f5f9;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.center { text-align: center; }
+.right { text-align: right; }
+.tablewrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+/* KPI Dashboards */
+.kpi-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.kpi-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  border-top: 4px solid var(--primary);
+  box-shadow: var(--shadow);
+}
+
+.kpi-card .k-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-card .k-val {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--primary);
+  margin: 8px 0;
+  line-height: 1.1;
+}
+
+.kpi-card .k-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Badges for status */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+}
+
+.b-tot { background-color: var(--success); }
+.b-kem { background-color: var(--warning); }
+.b-thanhly { background-color: var(--danger); }
+.b-sync { background-color: #3b82f6; }
+.b-unsync { background-color: #9ca3af; }
+
+/* Filter grid */
+.filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.filters .col {
+  min-width: 150px;
+  flex: 0 1 auto;
+}
+
+/* Progress bar */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bar-row .bl {
+  width: 180px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.bar-row .bt {
+  flex: 1;
+  background: var(--neutral-light);
+  border-radius: 6px;
+  height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bar-row .bf {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 30px;
+  transition: width 0.3s ease;
+}
+
+/* Scanned Product Spotlight Box */
+.spotlight-box {
+  background: var(--primary-light);
+  border: 2px dashed #93c5fd;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.spotlight-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.spotlight-meta {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* QR Scanner Container */
+#qr-reader-container {
+  display: none;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+}
+
+#qr-reader {
+  width: 100%;
+}
+
+.scanner-btn-group {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+/* Calculator grid for fast count inputs */
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.calc-btn {
+  background: var(--neutral-light);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.1s ease;
+}
+
+.calc-btn:hover {
+  background: #e5e7eb;
+}
+
+.calc-btn.op {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.calc-btn.eq {
+  background: var(--primary);
+  color: #fff;
+  grid-column: span 2;
+}
+
+/* Autocomplete search results */
+.search-wrap {
+  position: relative;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 0 0 8px 8px;
+  box-shadow: var(--shadow-lg);
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 999;
+  display: none;
+}
+
+.search-dropdown.show {
+  display: block;
+}
+
+.search-opt {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--neutral-light);
+  font-size: 13px;
+  transition: background 0.1s;
+}
+
+.search-opt:hover {
+  background: var(--primary-light);
+}
+
+.search-opt .opt-name {
+  font-weight: 600;
+  color: var(--neutral-dark);
+}
+
+.search-opt .opt-code {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Toast alert */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1e293b;
+  color: #fff;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.25s ease;
+  z-index: 9999;
+  max-width: 90vw;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Login Overlay */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+}
+
+.login-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.login-header h2 {
+  color: var(--primary);
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.login-header p {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.login-box .form-group {
+  margin-bottom: 18px;
+}
+
+.login-box label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.login-box input, .login-box select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.login-box input:focus, .login-box select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.login-box .btn-login {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 10px;
+  border-radius: 10px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(30, 58, 138, 0.25);
+}
+
+.login-box .btn-login:hover {
+  background-color: var(--primary-hover);
+}
+
+.login-error {
+  color: var(--danger);
+  font-size: 13px;
+  margin-top: 12px;
+  text-align: center;
+  min-height: 20px;
+  font-weight: 600;
+}
+
+.login-hint {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Offline Banner */
+.sync-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #92400e;
+}
+
+.sync-banner.synced {
+  background: #d1fae5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+/* Tabs */
+.tabs-header {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.1s;
+}
+
+.tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* Responsive UI tweaks */
+@media(max-width:768px){
+  .hamburger {
+    display: block;
+  }
+  .sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+    width: 250px;
+    transition: left 0.25s ease-in-out;
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open {
+    left: 0;
+  }
+  .topbar {
+    padding: 14px 16px 14px 64px;
+  }
+  .content {
+    padding: 16px;
+  }
+  input, select, textarea {
+    padding: 12px;
+    font-size: 16px; /* Prevents auto zoom in iOS Safari */
+  }
+  .btn {
+    padding: 13px 20px;
+    font-size: 15px;
+  }
+  .bar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+  .bar-row .bl {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 2px;
+  }
+  .topbar h2 {
+    font-size: 15px;
+  }
+}
+
+@media print {
+  .sidebar, .topbar, .hamburger, .overlay, .no-print, .btn-group {
+    display: none !important;
+  }
+  .content {
+    padding: 0;
+  }
+  .card {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <button class="hamburger no-print" id="hamburger" aria-label="Menu">☰</button>
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar Panel -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <h1>Kiểm Kê Vật Tư</h1>
+      <span>Công ty TNHH TM-SX Huệ Linh</span>
+    </div>
+    <nav class="nav" id="nav">
+      <button data-view="dashboard" class="active"><span class="ico">📊</span><span class="txt">Bảng điều khiển</span></button>
+      <button data-view="kiemke"><span class="ico">🎯</span><span class="txt">Quét mã & Kiểm kê</span></button>
+      <button data-view="lichsu"><span class="ico">📋</span><span class="txt">Phiếu kiểm vừa ghi</span></button>
+      <button data-view="danhmuc"><span class="ico">🔍</span><span class="txt">Tra cứu danh mục</span></button>
+      <button data-view="doichieu"><span class="ico">⚖️</span><span class="txt">Đối chiếu chênh lệch</span></button>
+      <button data-view="caidat"><span class="ico">⚙️</span><span class="txt">Cấu hình & Đồng bộ</span></button>
+    </nav>
+    <div class="sidebar-foot">
+      ERP Bravo Standardization v1.0
+      <div class="mode-pill" id="modePill">Chế độ: Cục bộ</div>
+    </div>
+  </aside>
+
+  <!-- Main Content Panel -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="viewTitle">Bảng điều khiển</h2>
+        <div class="sub" id="viewSub">Tổng quan số liệu kiểm kê thực tế</div>
+      </div>
+      <div class="btn-group no-print" id="topActions"></div>
+    </div>
+
+    <div class="content">
+      <!-- Sync notification banner -->
+      <div id="syncBanner" class="sync-banner synced no-print" style="display: none;">
+        <span id="syncBannerText">✓ Dữ liệu đã đồng bộ hoàn toàn với Google Sheets.</span>
+        <button class="btn sm sec no-print" onclick="dongBoTatCaPhieu()" id="btnSyncBanner" style="padding: 4px 8px; font-size: 11px;">Đồng bộ ngay</button>
+      </div>
+
+      <!-- VIEW: Dashboard -->
+      <section id="view-dashboard" class="view active">
+        <div class="kpi-cards">
+          <div class="kpi-card">
+            <div class="k-label">Tổng số lượt kiểm</div>
+            <div class="k-val" id="dbTotalCounts">0</div>
+            <div class="k-sub">Bản ghi đếm thực tế</div>
+          </div>
+          <div class="kpi-card" style="border-top-color: var(--success)">
+            <div class="k-label">Số lượng thực tế đếm</div>
+            <div class="k-val" id="dbTotalQty" style="color: var(--success)">0</div>
+            <div class="k-sub" id="dbTotalUnits">Đang tải...</div>
+          </div>
+          <div class="kpi-card" style="border-top-color: var(--warning)">
+            <div class="k-label">Mặt hàng đã đếm</div>
+            <div class="k-val" id="dbUniqueItems" style="color: var(--warning)">0</div>
+            <div class="k-sub" id="dbUniqueRatio">0% của danh mục</div>
+          </div>
+          <div class="kpi-card" style="border-top-color: var(--danger)" id="dbReconCard">
+            <div class="k-label">Mặt hàng lệch tồn</div>
+            <div class="k-val" id="dbDiscrepantItems" style="color: var(--danger)">0</div>
+            <div class="k-sub">So với sổ sách Bravo</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col card">
+            <h3>📈 Tiến độ kiểm kê theo Kho hàng</h3>
+            <div class="bar-chart" id="dbWarehouseProgress">
+              <!-- Render dynamically -->
+            </div>
+          </div>
+          <div class="col card">
+            <h3>📊 Cơ cấu tình trạng vật tư kiểm kê</h3>
+            <div class="bar-chart" id="dbConditionChart">
+              <!-- Render dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📌 Nhật ký ghi nhận gần nhất</h3>
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Kho/Vị trí</th>
+                  <th>Mã kiểm kê (Mã cũ)</th>
+                  <th>Tên hàng</th>
+                  <th class="right">SL thực tế</th>
+                  <th class="center">DVT</th>
+                  <th>Người kiểm</th>
+                  <th class="center">Tình trạng</th>
+                </tr>
+              </thead>
+              <tbody id="dbRecentCounts">
+                <!-- Render dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Scan & Count -->
+      <section id="view-kiemke" class="view">
+        <div class="card">
+          <h3>📍 Thông tin khu vực kiểm kê</h3>
+          <div class="row">
+            <div class="col">
+              <label for="kk_kho">Kho hàng kiểm kê *</label>
+              <select id="kk_kho">
+                <!-- Loaded dynamically -->
+              </select>
+            </div>
+            <div class="col">
+              <label for="kk_vitri">Vị trí cụ thể (Kệ/Hàng/Ô) *</label>
+              <input type="text" id="kk_vitri" placeholder="Nhập vị trí (VD: Ke A1, O-05, Bon-01)" list="suggest_vitri">
+              <datalist id="suggest_vitri">
+                <!-- Loaded dynamically -->
+              </datalist>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📦 Danh sách vật tư kho hàng</h3>
+          <div class="row no-print" style="margin-bottom: 12px; gap: 12px; align-items: flex-end;">
+            <div class="col" style="flex: 2; min-width: 200px;">
+              <label for="kk_search">Tìm kiếm vật tư</label>
+              <input type="text" id="kk_search" placeholder="Nhập tên hàng, mã ERP, mã cũ..." autocomplete="off">
+            </div>
+            <div class="col" style="flex: 1; min-width: 150px;">
+              <label for="kk_group_filter">Lọc theo nhóm hàng</label>
+              <select id="kk_group_filter">
+                <option value="">— Tất cả nhóm —</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tablewrap" style="margin-top: 12px; max-height: 420px; overflow-y: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mã kiểm kê</th>
+                  <th>Tên hàng hóa vật tư</th>
+                  <th class="center">ĐVT</th>
+                  <th>Nhóm hàng</th>
+                  <th class="right">Sổ sách</th>
+                  <th class="right">Thực tế</th>
+                  <th class="center no-print">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="kkMaterialTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination controls -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 8px;">
+            <span class="muted" id="kkPaginationText">Hiển thị 0 - 0 của 0 vật tư</span>
+            <div class="btn-group no-print">
+              <button class="btn sm sec" id="btnKkPrevPage">◀ Trang trước</button>
+              <button class="btn sm sec" id="btnKkNextPage">Trang sau ▶</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="countInputCard" style="display: none;">
+          <!-- Selected item spotlight -->
+          <div class="spotlight-box" id="itemSpotlight" style="margin-bottom: 16px;">
+            <div class="spotlight-title" id="sl_name">Chưa chọn vật tư</div>
+            <div class="spotlight-meta">
+              <div>Mã ERP Final: <b id="sl_ma_erp">—</b></div>
+              <div>Mã QR/Barcode: <b id="sl_ma_qr">—</b></div>
+              <div>Đơn vị tính: <b id="sl_dvt">—</b></div>
+              <div>Nhóm hàng: <b id="sl_nhom">—</b></div>
+              <div id="sl_ma_cu_container">Mã cũ (Barcode cũ): <b id="sl_ma_cu">—</b></div>
+            </div>
+          </div>
+
+          <h3>📝 Nhập số liệu kiểm đếm</h3>
+          
+          <div class="row">
+            <div class="col">
+              <label for="kk_qty">Số lượng thực đếm (Hỗ trợ phép tính cộng dồn, VD: 10+20+15) *</label>
+              <input type="text" id="kk_qty" placeholder="Nhập số lượng đếm được..." style="font-size: 18px; font-weight: 700; color: var(--primary);">
+              
+              <!-- Calculator buttons for easy mobile input -->
+              <div class="calc-grid no-print">
+                <button class="calc-btn op" onclick="pressCalc('+')">+</button>
+                <button class="calc-btn" onclick="pressCalc('7')">7</button>
+                <button class="calc-btn" onclick="pressCalc('8')">8</button>
+                <button class="calc-btn" onclick="pressCalc('9')">9</button>
+                
+                <button class="calc-btn op" onclick="pressCalc('-')">-</button>
+                <button class="calc-btn" onclick="pressCalc('4')">4</button>
+                <button class="calc-btn" onclick="pressCalc('5')">5</button>
+                <button class="calc-btn" onclick="pressCalc('6')">6</button>
+                
+                <button class="calc-btn op" onclick="pressCalc('*')">*</button>
+                <button class="calc-btn" onclick="pressCalc('1')">1</button>
+                <button class="calc-btn" onclick="pressCalc('2')">2</button>
+                <button class="calc-btn" onclick="pressCalc('3')">3</button>
+                
+                <button class="calc-btn danger" onclick="pressCalc('C')">C</button>
+                <button class="calc-btn" onclick="pressCalc('0')">0</button>
+                <button class="calc-btn" onclick="pressCalc('.')">.</button>
+                <button class="calc-btn eq" onclick="pressCalc('=')">=</button>
+              </div>
+            </div>
+
+            <div class="col">
+              <label for="kk_tinhtrang">Đánh giá chất lượng / tình trạng *</label>
+              <select id="kk_tinhtrang">
+                <option value="tot">🟢 Tốt (Vẫn sử dụng bình thường)</option>
+                <option value="kem">🟡 Kém (Hư hỏng nhẹ/Ẩm mốc/Cần xử lý)</option>
+                <option value="thanhly">🔴 Thanh lý (Hỏng hoàn toàn/Phế phẩm thải)</option>
+              </select>
+              
+              <label for="kk_hsd" style="margin-top: 12px;">Hạn sử dụng (nếu có)</label>
+              <input type="date" id="kk_hsd">
+            </div>
+          </div>
+
+          <div style="margin-top: 16px;">
+            <label for="kk_ghichu">Ghi chú kiểm kê (Lý do hỏng, bao bì bảo quản, hoặc mô tả hàng lạ)</label>
+            <textarea id="kk_ghichu" placeholder="Nhập thêm ghi chú chi tiết nếu có..."></textarea>
+          </div>
+
+          <div style="margin-top: 20px;" class="btn-group">
+            <button class="btn" id="btnSaveCount" style="padding: 14px 28px;">💾 Ghi Nhận Số Liệu</button>
+            <button class="btn sec" id="btnResetCount">Hủy bỏ</button>
+          </div>
+        </div>
+
+        <!-- Add unrecognized/new item button -->
+        <div class="card no-print">
+          <h3>➕ Vật tư lạ chưa có trong danh mục</h3>
+          <p class="muted" style="margin-bottom: 12px;">Nếu phát hiện vật tư, phế phẩm chưa được dán nhãn mã ERP chuẩn hóa, bấm nút bên dưới để khai báo mã tạm.</p>
+          <button class="btn sec" onclick="openKhaiBaoHangLa()">➕ Khai báo vật tư ngoài danh mục</button>
+        </div>
+      </section>
+
+      <!-- VIEW: Count History -->
+      <section id="view-lichsu" class="view">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h3>📋 Nhật ký kiểm kê trên thiết bị này</h3>
+            <button class="btn sm sec no-print" onclick="dongBoTatCaPhieu()">⬆ Đồng bộ tất cả</button>
+          </div>
+          <p class="muted" style="margin-bottom: 16px;">Danh sách các lần đếm được lưu trên trình duyệt máy này. Tự động đồng bộ lên Google Sheets khi có mạng.</p>
+          
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Kho/Vị trí</th>
+                  <th>Mã kiểm kê (Mã cũ)</th>
+                  <th>Tên hàng</th>
+                  <th class="right">SL thực tế</th>
+                  <th class="center">DVT</th>
+                  <th>Tình trạng</th>
+                  <th>Ghi chú</th>
+                  <th class="center">Đồng bộ</th>
+                  <th class="center no-print" style="width: 110px;">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="histTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Search Catalog -->
+      <section id="view-danhmuc" class="view">
+        <div class="card">
+          <h3>🔍 Danh mục vật tư chuẩn hóa ERP Bravo</h3>
+          <div class="filters">
+            <div class="col" style="flex: 1; min-width: 250px;">
+              <label for="cat_search">Gõ tìm kiếm mã ERP, Tên hàng, mã QR...</label>
+              <input type="text" id="cat_search" placeholder="Nhập từ khóa tìm kiếm...">
+            </div>
+            <div class="col">
+              <label for="cat_loai">Phân loại</label>
+              <select id="cat_loai">
+                <option value="">— Tất cả loại —</option>
+                <option value="NVL">Nguyên vật liệu (NVL)</option>
+                <option value="BTP">Bán thành phẩm (BTP)</option>
+                <option value="TP">Thành phẩm (TP)</option>
+                <option value="VT">Phụ tùng/Bao bì (VT)</option>
+                <option value="PP">Phế phẩm (PP)</option>
+              </select>
+            </div>
+          </div>
+          <div class="muted" style="margin-bottom: 10px;" id="catTotalText">Đang tải danh mục...</div>
+          
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>Mã kiểm kê (PREFIX-STT)</th>
+                  <th>Mã cũ (Barcode cũ)</th>
+                  <th>Tên vật tư chuẩn hóa</th>
+                  <th>Mã ERP Final</th>
+                  <th class="center">DVT</th>
+                  <th>Nhóm hàng</th>
+                  <th>Vị trí</th>
+                </tr>
+              </thead>
+              <tbody id="catTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination controls -->
+          <div class="btn-group" style="margin-top: 16px; justify-content: center;" id="catPagination">
+            <!-- Loaded dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Reconciliation (Admin only) -->
+      <section id="view-doichieu" class="view">
+        <div class="card">
+          <h3>📥 Nhập số liệu Sổ sách (Bravo Export)</h3>
+          <p class="muted" style="margin-bottom: 12px;">Copy danh sách tồn kho từ báo cáo của phần mềm Bravo (Dạng cột: Mã ERP Final | Số lượng tồn sổ sách) dán vào đây để đối chiếu với tồn thực tế đã đếm.</p>
+          <textarea id="rc_book_data" placeholder="Mã_ERP_Final&#9;So_Luong_Sach&#10;NVL-BD-1000C-0001&#9;1500&#10;NVL-BD-110-0002&#9;350" style="font-family: monospace; font-size: 12px; min-height: 120px;"></textarea>
+          
+          <div class="btn-group" style="margin-top: 10px;">
+            <button class="btn" onclick="importBookStock()">📥 Nạp dữ liệu sổ sách</button>
+            <button class="btn sec" onclick="loadSampleBookStock()">💡 Nạp mẫu thử nghiệm</button>
+            <button class="btn sec danger" onclick="clearBookStock()">🗑 Xóa sổ sách</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>⚖️ Bảng đối chiếu chênh lệch Sổ sách vs Thực tế</h3>
+          <div class="filters">
+            <div class="col" style="flex: 1; min-width: 200px;">
+              <label for="rc_filter_search">Tìm mã/tên hàng</label>
+              <input type="text" id="rc_filter_search" placeholder="Nhập mã hoặc tên hàng...">
+            </div>
+            <div class="col">
+              <label for="rc_filter_warehouse">Lọc theo Kho</label>
+              <select id="rc_filter_warehouse">
+                <option value="">— Tất cả —</option>
+                <!-- Loaded dynamically -->
+              </select>
+            </div>
+            <div class="col">
+              <label for="rc_filter_status">Trạng thái chênh lệch</label>
+              <select id="rc_filter_status">
+                <option value="">— Tất cả —</option>
+                <option value="lech">Bị chênh lệch (Thực tế != Sổ sách)</option>
+                <option value="khop">Khớp hoàn toàn</option>
+                <option value="thua">Thừa thực tế (Thực tế > Sổ sách)</option>
+                <option value="thieu">Thiếu thực tế (Thực tế < Sổ sách)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <div class="muted" id="rcTotalText">Đang tải đối chiếu...</div>
+            <div class="btn-group no-print">
+              <button class="btn sm" onclick="xuatExcelDoichieu()">⬇ Xuất file Import Bravo (.csv)</button>
+              <button class="btn sm sec" onclick="xuatBienBanKiemKe()">🖨 In Biên bản chênh lệch</button>
+            </div>
+          </div>
+
+          <div class="tablewrap" id="printReconArea">
+            <div class="print-only" style="display: none; text-align: center; margin-bottom: 20px;">
+              <h2>BIÊN BẢN TỔNG HỢP KẾT QUẢ KIỂM KÊ VẬT TƯ</h2>
+              <p>Công ty TNHH Thương mại - Sản xuất Huệ Linh · Ngày lập: <span id="printDateStr"></span></p>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Mã kiểm kê (Mã cũ)</th>
+                  <th>Tên hàng hóa vật tư</th>
+                  <th class="center">DVT</th>
+                  <th>Kho</th>
+                  <th class="right">Sổ sách</th>
+                  <th class="right">Thực tế</th>
+                  <th class="right">Chênh lệch</th>
+                  <th class="center">Trạng thái</th>
+                  <th class="no-print">Lý do & Kiến nghị xử lý (Ghi chú)</th>
+                </tr>
+              </thead>
+              <tbody id="rcTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Settings & Sync -->
+      <section id="view-caidat" class="view">
+        <div class="card">
+          <h3>⚙️ Cấu hình đồng bộ hệ thống</h3>
+          
+          <div class="radio-mode">
+            <label>
+              <input type="radio" name="store_mode" value="local" checked>
+              <span>
+                <b>Trường hợp 1 — Lưu trữ cục bộ (Offline)</b>
+                <br>
+                <span class="muted">Dữ liệu được lưu trữ an toàn trong trình duyệt web của thiết bị này. Phù hợp khi đếm độc lập và xuất Excel cuối ngày.</span>
+              </span>
+            </label>
+            <label>
+              <input type="radio" name="store_mode" value="sheet">
+              <span>
+                <b>Trường hợp 2 — Đồng bộ trực tuyến (Google Sheets)</b>
+                <br>
+                <span class="muted">Đồng bộ trực tiếp dữ liệu của tất cả máy điện thoại công nhân đếm về chung một file Google Sheets của Kế toán.</span>
+              </span>
+            </label>
+          </div>
+
+          <div id="sheetSettingsSection" style="display: none; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+            <div class="form-group">
+              <label for="cfg_gas_url">URL ứng dụng Google Apps Script (Web App URL)</label>
+              <input type="text" id="cfg_gas_url" placeholder="https://script.google.com/macros/s/..../exec">
+              <div class="muted" style="margin-top: 6px;">Dán liên kết Apps Script đã Deploy ở chế độ "Execute as: Me" và "Who has access: Anyone".</div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 14px;">
+              <button class="btn sec sm" onclick="testGASConnection()">🔌 Kiểm tra kết nối (Ping)</button>
+              <button class="btn sec sm" onclick="dongBoTatCaPhieu()">⬆ Đồng bộ toàn bộ lên Google Sheets</button>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <button class="btn" onclick="saveConfiguration()">💾 Lưu cấu hình</button>
+          </div>
+        </div>
+
+        <!-- Database backups -->
+        <div class="card">
+          <h3>📦 Quản lý dữ liệu cục bộ</h3>
+          <div class="muted" style="margin-bottom: 12px;">Số liệu kiểm kê hiện tại trên máy này: <b id="cfgLocalCount">0</b> bản ghi.</div>
+          <div class="btn-group">
+            <button class="btn sm" onclick="xuatSaoLuuJSON()">⬇ Sao lưu dữ liệu (.json)</button>
+            <button class="btn sm sec" onclick="document.getElementById('file_restore').click()">⬆ Khôi phục dữ liệu (.json)</button>
+            <input type="file" id="file_restore" accept=".json" style="display: none;" onchange="nhapSaoLuuJSON(event)">
+            <button class="btn sm sec" onclick="reloadBookStockFromDefault()" title="Nạp lại tồn kho sổ sách từ file data_vattu.js (sau khi chạy generate_final.py)">🔄 Nạp lại sổ sách ERP</button>
+            <button class="btn sm danger" onclick="clearAllData()">🗑 Xóa sạch dữ liệu kiểm kê</button>
+          </div>
+        </div>
+
+        <!-- Google Apps Script Source Code Copy -->
+        <div class="card">
+          <h3>📄 Mã nguồn Google Apps Script (Dành cho Kế toán thiết lập Google Sheet)</h3>
+          <p class="muted" style="margin-bottom: 8px;">Tạo 1 file Google Sheets, bấm Tiện ích mở rộng → Apps Script. Xóa hết code cũ, dán đoạn code dưới đây rồi Deploy thành Web App.</p>
+          <textarea readonly style="font-family: monospace; font-size: 11px; height: 180px; background-color: #0f172a; color: #f8fafc; padding: 12px; border-radius: 8px; resize: none;" id="gasSourceCodeBox">
+// Code Apps Script
+          </textarea>
+          <button class="btn sm sec" style="margin-top: 8px;" onclick="copyGASCode()">📋 Sao chép mã nguồn</button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- Modal: Khai báo hàng lạ chưa có mã -->
+<div id="modalHangLa" class="login-overlay" style="display: none;">
+  <div class="login-box" style="max-width: 500px;">
+    <div class="login-header">
+      <h2>Khai Báo Vật Tư Ngoài Danh Mục</h2>
+      <p>Ghi nhận hàng hóa lạ, phế phẩm chưa được chuẩn hóa ERP</p>
+    </div>
+    
+    <div class="form-group">
+      <label for="hl_kho">Kho phát hiện *</label>
+      <select id="hl_kho">
+        <!-- Loaded dynamically -->
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="hl_vitri">Vị trí cụ thể *</label>
+      <input type="text" id="hl_vitri" placeholder="Nhập vị trí...">
+    </div>
+
+    <div class="form-group">
+      <label for="hl_ten">Mô tả tên vật tư / phế phẩm lạ *</label>
+      <input type="text" id="hl_ten" placeholder="Ví dụ: Phế liệu màng nhựa màu xanh cuộn lớn, Bi sứ hỏng...">
+    </div>
+
+    <div class="row">
+      <div class="col form-group">
+        <label for="hl_dvt">Đơn vị tính *</label>
+        <select id="hl_dvt">
+          <option value="Kg">Kg</option>
+          <option value="Bao">Bao</option>
+          <option value="Cuộn">Cuộn</option>
+          <option value="Cái">Cái</option>
+          <option value="Mét">Mét</option>
+          <option value="Bình">Bình</option>
+          <option value="Hộp">Hộp</option>
+        </select>
+      </div>
+      <div class="col form-group">
+        <label for="hl_qty">Số lượng đếm *</label>
+        <input type="number" id="hl_qty" placeholder="Nhập số lượng..." min="0">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="hl_tinhtrang">Tình trạng chất lượng *</label>
+      <select id="hl_tinhtrang">
+        <option value="tot">🟢 Tốt (tái chế/tái sử dụng được)</option>
+        <option value="kem">🟡 Kém / Cần rà soát</option>
+        <option value="thanhly">🔴 Phế phẩm thải / Thanh lý</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="hl_ghichu">Ghi chú thêm</label>
+      <input type="text" id="hl_ghichu" placeholder="Mô tả thêm đặc tính, nguồn gốc...">
+    </div>
+
+    <div class="btn-group" style="margin-top: 20px;">
+      <button class="btn" onclick="saveHangLa()">💾 Lưu khai báo</button>
+      <button class="btn sec" onclick="closeKhaiBaoHangLa()">Hủy bỏ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Login Overlay -->
+<div id="loginOverlay" class="login-overlay" style="display: flex;">
+  <div class="login-box">
+    <div class="login-header">
+      <h2>KIỂM KÊ ERP BRAVO</h2>
+      <p>Công ty TNHH Thương mại - Sản xuất Huệ Linh</p>
+    </div>
+    <form id="loginForm" onsubmit="doLoginAction(event)">
+      <div class="form-group">
+        <label for="loginUser">Nhân sự kiểm kê</label>
+        <select id="loginUser" required>
+          <!-- Preloaded from data_nhansu.js -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="loginPass">Mật khẩu xác nhận</label>
+        <input type="password" id="loginPass" placeholder="Nhập mật khẩu (mặc định: mã nhân sự viết thường)" required>
+      </div>
+      <button type="submit" class="btn-login">ĐĂNG NHẬP</button>
+      <div class="login-error" id="loginError"></div>
+    </form>
+    <div class="login-hint">
+      <small>Mật khẩu mặc định là <b>Mã nhân viên viết thường</b> (VD: t0008, d0012). Tài khoản Admin: <b>admin</b> / <b>admin123</b>.</small>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <span id="toastIcon">✓</span>
+  <span id="toastText">Thông báo hệ thống</span>
+</div>
+
+<!-- Load preloaded static datasets -->
+<script src="data_nhansu.js"></script>
+<script src="data_kho.js"></script>
+<script src="data_vattu.js"></script>
+
+<!-- Load Auth & Main application code -->
+<script src="auth.js"></script>
+<script src="app.js"></script>
+
+<script>
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('PWA Service Worker registered successfully', reg.scope))
+      .catch(err => console.error('PWA Service Worker registration failed', err));
+  });
+}
+</script>
+</body>
+</html>
